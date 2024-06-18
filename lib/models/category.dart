@@ -1,6 +1,5 @@
 class Category {
-  final int id;
-  final int typeId;
+  final int id, typeId;
   final String name;
   final String notes;
 

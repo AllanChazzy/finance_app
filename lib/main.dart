@@ -1,3 +1,5 @@
+import 'package:finance_app/models/category.dart';
+import 'package:finance_app/services/database_service.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,12 +13,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CRUD Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Finance App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'CRUD Demo List'),
+      home: const MyHomePage(title: 'Finance App'),
     );
   }
 }
@@ -31,9 +34,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _newCategory() {
-    setState(() {});
-  }
+  final DatabaseService _databaseService = DatabaseService.instance;
+
+  String? _categoryName = null;
+  String? _categoryNotes = null;
 
   @override
   Widget build(BuildContext context) {
@@ -42,19 +46,107 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Teste'),
-          ],
-        ),
-      ),
+      body: _categoryList(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _newCategory,
         tooltip: 'New',
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                    title: Text("Nova Categoria"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _categoryName = value;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Nome',
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              _categoryNotes = value;
+                            });
+                          },
+                          maxLines: 6,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Notas',
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                if (_categoryName == null ||
+                                    _categoryName == "") return;
+                                _databaseService.addCategory(
+                                    _categoryName!, _categoryNotes!);
+                                setState(() {
+                                  _categoryName = null;
+                                  _categoryNotes = null;
+                                });
+                                Navigator.pop(
+                                  context,
+                                );
+                              },
+                              child: Text(
+                                'Salvar',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ));
+        },
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  Widget _categoryList() {
+    return FutureBuilder(
+      future: _databaseService.getCategories(),
+      builder: (context, snapshot) {
+        return ListView.builder(
+          itemCount: snapshot.data?.length ?? 0,
+          itemBuilder: (context, index) {
+            Category category = snapshot.data![index];
+            return ListTile(
+                onLongPress: () {
+                  _databaseService.deleteCategory(
+                    category.id,
+                  );
+                  setState(() {});
+                },
+                title: Text(category.name),
+                subtitle: Text(category.notes),
+                trailing: Checkbox(
+                  value: category.typeId == 1,
+                  onChanged: (value) {
+                    _databaseService.updateCategoryTypeId(
+                      category.id,
+                      value == true ? 1 : 0,
+                    );
+                    setState(() {});
+                  },
+                ));
+          },
+        );
+      },
     );
   }
 }
