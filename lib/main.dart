@@ -14,12 +14,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Finance App',
+      title: 'Categories',
       theme: ThemeData(
+        fontFamily: 'Lexend',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Finance App'),
+      home: const MyHomePage(title: 'Categories'),
     );
   }
 }
@@ -36,8 +37,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final DatabaseService _databaseService = DatabaseService.instance;
 
-  String? _categoryName = null;
-  String? _categoryNotes = null;
+  String? _categoryName;
+  String? _categoryNotes;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: _categoryList(),
       floatingActionButton: FloatingActionButton(
