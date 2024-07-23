@@ -43,12 +43,12 @@ class DatabaseService {
     return database;
   }
 
-  void addCategory(String contentName, String contentNotes) async {
+  void addCategory(String contentName, int contentType, String contentNotes) async {
     final db = await database;
     await db.insert(_categoryTableName, {
       _categoryColumnName: contentName,
       _categoryColumnNotes: contentNotes,
-      _categoryColumnTypeId: 0,
+      _categoryColumnTypeId: contentType,
     });
   }
 
